@@ -1,5 +1,9 @@
-// Este es el punto de entrada de tu aplicacion
+import { initFirebase } from "./lib/firebase";
+import { initRouter } from "./router";
+import { ROUTES } from "./routes";
 
-import { myFunction } from './lib/index.js';
+// Initialize Firebase
+initFirebase();
 
-myFunction();
+// Initialize Router
+initRouter(ROUTES);
