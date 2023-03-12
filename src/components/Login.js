@@ -2,6 +2,7 @@ import { signInWithGoogle, signInWithPassword } from "../lib/authentication";
 import { navigateTo } from "../router";
 
 export const Login = () => {
+  // Create a div element to hold the login component
   const div = document.createElement('div');
   div.innerHTML = `<div class="container">
     <form id="loginForm">
@@ -56,10 +57,13 @@ export const Login = () => {
     </div>
   </div>`;
 
+  // Function to open modal
   const openModal = (message) => {
     div.querySelector('.modal').style.display = "block";
     div.querySelector('.modal-content > p:nth-child(2)').textContent = message;
   };
+
+  // Add event listeners to the login component
 
   div.querySelector('#loginForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -96,5 +100,7 @@ export const Login = () => {
     e.preventDefault();
     div.querySelector('.modal').style.display = "none";
   });
+
+  // Return the div element
   return div;
 }
