@@ -25,7 +25,7 @@ describe('Pruebas de login', () => {
     return Promise.resolve().then(() => expect(router.navigateTo).toHaveBeenCalledWith('/home'));
   });
 
-  /*it('Autenticación con correo electrónico y contraseña incorrecta, NO debería redireccionar a /home', () => {
+  it('Autenticación con correo electrónico y contraseña incorrecta, NO debería redireccionar a /home', () => {
     //preparamos el mock
     authentication.signInWithPassword.mockRejectedValueOnce(new Error('Error'));
     
@@ -37,6 +37,6 @@ describe('Pruebas de login', () => {
     loginDiv.querySelector('#loginForm').dispatchEvent(new Event('submit'));
     // confirmar que no se llamo a la funcion
     return Promise.resolve().then(() => expect(router.navigateTo).not.toHaveBeenCalled());
-  });*/
+  });
 });
 
