@@ -32,7 +32,7 @@ Tómate unos minutos para explorar el código y entender cómo funciona.
 
 ### Ruteador
 
-El archivo `index.html` hace uso del archivo `main.js`. Este archivo ejecuta la función `initFirebase` para inicializar Firebase y la función `initRouter` para incializar el ruteador. 
+El archivo `index.html` hace uso del archivo `main.js`. Este archivo ejecuta la función `initFirebase` para inicializar Firebase y la función `initRouter` para incializar el ruteador.
 
 ```js
 // Initialize Firebase
@@ -104,7 +104,7 @@ El siguiente bloque de código de la función `Login` agrega un `event listener`
           openModal(error.message);
         })
   });
-``` 
+```
 
 De acuerdo al `event listener` una vez se disparan el evento `submit`, se recuperan los valores de los `<Input>` con id `username` y `password` y se ejecuta la función `signInWithPassword` del archivo `lib/authentication.js`. **Pregunta**: ¿Qué tipo de objeto retorna la función `signInWithPassword`?
 
@@ -118,7 +118,7 @@ Crea el archivo `tests/login.spec.js`. Allí crea un `describe` para agrupar los
 
 ```js
 describe('Pruebas de login', () => {
-  
+
   it('Autenticación con correo electrónico y contraseña correcta, debería redireccionar a /home', () => {
   });
 
@@ -150,7 +150,7 @@ Para el paso 2, usamos el método `querySelector` para seleccionar los `<Input>`
 
 ```js
   loginDiv.querySelector('#username').value = 'ssinuco@gmail.com';
-      loginDiv.querySelector('#password').value = '123456';  
+      loginDiv.querySelector('#password').value = '123456';
 ```
 
 Para el paso 3, usamos el método `querySelector` para seleccionar el `<Form>` con id `loginForm` y disparar el evento `submit` con ayuda del método `dispatchEvent`.
@@ -159,16 +159,15 @@ Para el paso 3, usamos el método `querySelector` para seleccionar el `<Form>` c
   loginDiv.querySelector('#loginForm').dispatchEvent(new Event('submit'));
 ```
 
-Para el paso 4, usamos el método `toHaveBeenCalledWith` (que en español traduce [_haber sido llamado con_](https://translate.google.com/?sl=en&tl=es&text=to%20Have%20Been%20Called%20With&op=translate)) para verificar que la función `navigateTo` haya sido llamada con un argumento de valor '/home'.
+Para el paso 4, usamos el atributo `pathname` del objeto `window.location` para verifcar la ruta de la url actual en el navegador.
 
 ```js
-  expect(router.navigateTo).toHaveBeenCalledWith('/home')
+  expect(window.location.pathname).toBe('/home');
 ```
 
 El código completo de la prueba hasta el momento es:
 
 ```js
-  import * as router from "../src/router";
   import { Login } from '../src/components/Login';
 
   describe('Pruebas de login', () => {
@@ -179,13 +178,13 @@ El código completo de la prueba hasta el momento es:
 
       //Paso 2: Completamos el formulario con un correo electrónico y contraseña correctos.
       loginDiv.querySelector('#username').value = 'ssinuco@gmail.com';
-      loginDiv.querySelector('#password').value = '123456';  
-      
+      loginDiv.querySelector('#password').value = '123456';
+
       //Paso 3: Enviamos el formulario dando clic en el botón `Login`.
       loginDiv.querySelector('#loginForm').dispatchEvent(new Event('submit'));
 
       //Paso 4: Verificamos visualmente que la aplicación redija a `/home`.
-      expect(router.navigateTo).toHaveBeenCalledWith('/home');
+      expect(window.location.pathname).toBe('/home');
     });
   });
 ```
@@ -194,21 +193,15 @@ Si ejecutamos esta prueba con el comando `npm test` encontraremos un error como 
 
 ![Error firebase](./docs/images/error_firebase.png)
 
-Este error ocurre porque no hemos inicializado `Firebase`. Esto quiere decir que para poder ejecutar nuestra prueba unitaria necesitamos estar conectados a internet, tener un proyecto y app en `firebase` y además aseguranos que esté registrado un usuario con correo electrónico `ssinuco@gmail.com` y contraseña `123456`. **Todo esto es muy complicado y la prueba unitaria no deberia depender de estas configuraciones**. Imagina por ejemplo que durante el desarrollo eliminas el usuario, entonces la prueba fallaria. Para solucionar esto vamos a usar [`mocks`](https://jestjs.io/docs/mock-functions). 
+Este error ocurre porque no hemos inicializado `Firebase`. Esto quiere decir que para poder ejecutar nuestra prueba unitaria necesitamos estar conectados a internet, tener un proyecto y app en `firebase` y además aseguranos que esté registrado un usuario con correo electrónico `ssinuco@gmail.com` y contraseña `123456`. **Todo esto es muy complicado y la prueba unitaria no deberia depender de estas configuraciones**. Imagina por ejemplo que durante el desarrollo eliminas el usuario, entonces la prueba fallaria. Para solucionar esto vamos a usar [`mocks`](https://jestjs.io/docs/mock-functions).
 
 Un `mock` de una función podria definirse como una simulación de la función. La idea es entonces hacer un `mock` de las funciones que usan `firebase`, para que en la prueba unitaria, no se ejecuten las funciones _reales_ sino una simulación que podemos manipular como queramos.
 
-Especificamos entonces que las funciones `signInWithGoogle` y `signInWithPassword` van a ser mocks usando `jest.fn()`. 
+Especificamos entonces que las funciones `signInWithGoogle` y `signInWithPassword` van a ser mocks usando `jest.fn()`.
 
 ```js
   authentication.signInWithGoogle = jest.fn();
   authentication.signInWithPassword = jest.fn();
-```
-
-La función `navigateTo` también debería ser un mock para poder usar `toHaveBeenCalledWith`.
-
-```js
-  router.navigateTo = jest.fn(() => console.log('mock de navigateTo usado'));
 ```
 
 Para el primer caso de prueba, en que la autenticación es correcta, la función `signInWithGoogle` debe resolver una promesa. ;Manipulamos el mock usando el método `mockResolvedValueOnce`.
@@ -220,7 +213,6 @@ Para el primer caso de prueba, en que la autenticación es correcta, la función
 El código completo de la prueba hasta el momento es:
 
 ```js
-  import * as router from "../src/router";
   import { Login } from '../src/components/Login';
 
   describe('Pruebas de login', () => {
@@ -228,8 +220,7 @@ El código completo de la prueba hasta el momento es:
     beforeEach(() => {
       authentication.signInWithGoogle = jest.fn();
       authentication.signInWithPassword = jest.fn();
-      router.navigateTo = jest.fn(() => console.log('mock de navigateTo usado'));
-    });  
+    });
 
     it('Autenticación con correo electrónico y contraseña correcta, debería redireccionar a /home', () => {
       //preparamos el mock
@@ -240,33 +231,30 @@ El código completo de la prueba hasta el momento es:
 
       //Paso 2: Completamos el formulario con un correo electrónico y contraseña correctos.
       loginDiv.querySelector('#username').value = 'ssinuco@gmail.com';
-      loginDiv.querySelector('#password').value = '123456';  
-      
+      loginDiv.querySelector('#password').value = '123456';
+
       //Paso 3: Enviamos el formulario dando clic en el botón `Login`.
       loginDiv.querySelector('#loginForm').dispatchEvent(new Event('submit'));
 
       //Paso 4: Verificamos visualmente que la aplicación redija a `/home`.
-      expect(router.navigateTo).toHaveBeenCalledWith('/home')
+      expect(window.location.pathname).toBe('/home');
     });
   });
 ```
 
 Si ejecutamos esta prueba con el comando `npm test` encontraremos un error como el mostrado a continuación:
 
-![Error async test](./docs/images/error_async_test.png)
+# TODO: agregar imagen de error y explicación del error
 
-El error nos dice que la función `navigateTo` no ha sido llamada por lo tanto la prueba falla. Sin embargo si nos fijamos en los mensajes de la terminal tenemos un console.log con el mensaje `mock de navigateTo usado`. Por lo tanto el mock si ha sido llamado. ¿Por qué entonces falla la prueba?.
-
-La prueba falla porque estamos probando código asincrono (es decir promesas y callbacks) y para ello la librería Jest requiere que la prueba [retorne una promesa](https://jestjs.io/es-ES/docs/asynchronous#promises) y el `expect` ocurra bien sea en el then o catch.
+La prueba falla porque estamos probando código asincrono (es decir promesas y callbacks) y para ello la librería Jest requiere que la prueba [retorne una promesa](https://jestjs.io/es-ES/docs/asynchronous#promises) y el `expect` ocurra en el then.
 
 ```js
-  return Promise.resolve().then(() => expect(router.navigateTo).toHaveBeenCalledWith('/home'));
+  return Promise.resolve().then(() => expect(window.location.pathname).toBe('/home'));
 ```
 
 El código completo de la prueba es finamente:
 
 ```js
-  import * as router from "../src/router";
   import { Login } from '../src/components/Login';
 
   describe('Pruebas de login', () => {
@@ -274,8 +262,7 @@ El código completo de la prueba es finamente:
     beforeEach(() => {
       authentication.signInWithGoogle = jest.fn();
       authentication.signInWithPassword = jest.fn();
-      router.navigateTo = jest.fn(() => console.log('mock de navigateTo usado'));
-    });  
+    });
 
     it('Autenticación con correo electrónico y contraseña correcta, debería redireccionar a /home', () => {
       //preparamos el mock
@@ -286,13 +273,13 @@ El código completo de la prueba es finamente:
 
       //Paso 2: Completamos el formulario con un correo electrónico y contraseña correctos.
       loginDiv.querySelector('#username').value = 'ssinuco@gmail.com';
-      loginDiv.querySelector('#password').value = '123456';  
-      
+      loginDiv.querySelector('#password').value = '123456';
+
       //Paso 3: Enviamos el formulario dando clic en el botón `Login`.
       loginDiv.querySelector('#loginForm').dispatchEvent(new Event('submit'));
 
       //Paso 4: Verificamos visualmente que la aplicación redija a `/home`.
-      return Promise.resolve().then(() => expect(router.navigateTo).toHaveBeenCalledWith('/home'));
+      return Promise.resolve().then(() => expect(window.location.pathname).toBe('/home'));
     });
   });
 ```
